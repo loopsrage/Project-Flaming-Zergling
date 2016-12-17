@@ -23,7 +23,6 @@ public class Hand
 
 	private bool isRoyal;
 	private Dictionary<int,int> pairs;
-	private List<Card> currentBest;
 
 	public Hand()
 	{
@@ -39,8 +38,16 @@ public class Hand
 		cards.Add (c);
 	}
 
+	public void AddCardAt(Card c, int i)
+	{
+		cards[i] = c;
+	}
+
 	public HandEnum DetectHand()
 	{
+		isRoyal = false;
+		pairs = new Dictionary<int, int> ();
+
 		type = HandEnum.highCard;
 		GetPairs();
 
@@ -88,12 +95,6 @@ public class Hand
 	public HandEnum GetBetterHand(HandEnum h1, HandEnum h2)
 	{
 		return ((int)h1 > (int) h2) ? h1 : h2;
-	}
-
-	public List<Card> GetWinningCards()
-	{
-		return new List<Card> ();
-
 	}
 
 	private bool CheckFlush()
