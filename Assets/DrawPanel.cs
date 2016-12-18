@@ -51,11 +51,11 @@ public class DrawPanel : MonoBehaviour
 
 	private void UpdateDrawText()
 	{
-		redrawText.text = DRAW_TEXT + " x" + DeckManager.instance.numDrawsPurchased;
+		redrawText.text = DRAW_TEXT + " x" + DeckManager.instance.numDrawsPurchased.ToString();
 	}
 
 	void Start()
 	{
-		FirstDraw ();
+		
 	}
 }

@@ -14,6 +14,8 @@ public class BuilderManager : MonoBehaviour
 	private GameObject OKInidicatorObj;
 	private GameObject BlockedIndicitaroObj;
 
+	public GameObject confirmBtn;
+
 	private bool isBuilding = false;
 	private bool isBlocked = false;
 
@@ -35,6 +37,7 @@ public class BuilderManager : MonoBehaviour
 		currentStatusObject = OKInidicatorObj;
 		OKInidicatorObj.SetActive (true);
 		isBuilding = true;
+		confirmBtn.SetActive (true);
 
 	}
 
@@ -50,11 +53,17 @@ public class BuilderManager : MonoBehaviour
 
 	private void ConfirmBuild()
 	{
-		// show message
-		//if yes
-		BuildObject();
+		OKInidicatorObj.SetActive(false);
+		BlockedIndicitaroObj.SetActive (false);
+		isBuilding = false;
 	}
 
+	public void PlaceBuilding()
+	{
+		confirmBtn.SetActive (false);
+		BuildObject ();
+	}
+		
 	private void SwapStatusIndicator()
 	{
 		isBlocked = !isBlocked;
@@ -81,28 +90,29 @@ public class BuilderManager : MonoBehaviour
 			return;
 		}
 		if (isBuilding) {
-			// Check if being Blocked
-			Ray r =	Camera.main.ScreenPointToRay(Input.mousePosition);
-			RaycastHit hit;
-			if (Physics.Raycast(r, out hit)) {
-				if (hit.collider.tag == towerTag) {
-					if (!isBlocked) {
-						SwapStatusIndicator ();
+			if (Input.touchCount > 0 && Input.GetTouch (0).phase == TouchPhase.Moved || Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.OSXEditor) {
+				// Check if being Blocked
+				Ray r =	Camera.main.ScreenPointToRay (Input.mousePosition);
+				RaycastHit hit;
+				if (Physics.Raycast (r, out hit)) {
+					if (hit.collider.tag == towerTag) {
+						if (!isBlocked) {
+							SwapStatusIndicator ();
+						}
+					} else {
+						if (isBlocked) {
+							SwapStatusIndicator ();
+						}
 					}
-				} else {
-					if (isBlocked) {
-						SwapStatusIndicator ();
-					}
+					// Update Position
+					UpdateIndicatorPosition (hit.point);
 				}
-				// Update Position
-				UpdateIndicatorPosition(hit.point);
-			}
 
-			// Check Build
-			if (Input.GetMouseButtonDown (0) && !isBlocked) {
-				ConfirmBuild ();
+				// Check Build
+				if (Input.GetMouseButtonDown (0) && !isBlocked) {
+					ConfirmBuild ();
+				}
 			}
-
 		}
 	}
 
