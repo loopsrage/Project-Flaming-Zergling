@@ -47,16 +47,9 @@ public class BuilderManager : MonoBehaviour
 		isBuilding = false;
 		OKInidicatorObj.SetActive (false);
 		BlockedIndicitaroObj.SetActive (false);
-		currentBuilding.SetState (Tower.state.Active);
+		currentBuilding.Build ();
 		currentBuilding = null;
 		onBuild.Invoke ();
-	}
-
-	private void ConfirmBuild()
-	{
-		OKInidicatorObj.SetActive(false);
-		BlockedIndicitaroObj.SetActive (false);
-		isBuilding = false;
 	}
 
 	public void PlaceBuilding()
@@ -119,7 +112,7 @@ public class BuilderManager : MonoBehaviour
 
 				// Check Build
 				if (Input.GetMouseButtonDown (0) && !isBlocked) {
-					ConfirmBuild ();
+					PlaceBuilding ();
 				}
 			}
 		}
