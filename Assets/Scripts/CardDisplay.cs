@@ -54,12 +54,13 @@ public class CardDisplay : MonoBehaviour
 	void Awake()
 	{
 		img = GetComponent<Image> ();
+		emptyImg = img.sprite;
 	}
 
 	void Start()
 	{
 		deck = DeckManager.instance;
-		emptyImg = img.sprite;
+
 	}
 
 }

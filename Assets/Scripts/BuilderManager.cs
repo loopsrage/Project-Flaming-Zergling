@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class BuilderManager : MonoBehaviour 
 {
@@ -18,12 +19,17 @@ public class BuilderManager : MonoBehaviour
 
 	private GameObject currentStatusObject;
 
-
+	private float afterStartWaitTime = 0.2f;
+	private float afterStartWaitElapsed = 0.0f;
 	private GameObject currentBuilding;
+
+	public class BuildEvent : UnityEvent{}
+	public BuildEvent onBuild = new BuildEvent ();
 
 
 	public void StartBuilding(GameObject objToBuild)
 	{
+		afterStartWaitElapsed = 0;
 		currentBuilding = objToBuild;
 		currentBuilding.GetComponent<Collider> ().enabled = false;
 		currentStatusObject = OKInidicatorObj;
@@ -39,6 +45,14 @@ public class BuilderManager : MonoBehaviour
 		BlockedIndicitaroObj.SetActive (false);
 		currentBuilding.GetComponent<Collider> ().enabled = true;
 		currentBuilding = null;
+		onBuild.Invoke ();
+	}
+
+	private void ConfirmBuild()
+	{
+		// show message
+		//if yes
+		BuildObject();
 	}
 
 	private void SwapStatusIndicator()
@@ -62,6 +76,10 @@ public class BuilderManager : MonoBehaviour
 
 	void Update()
 	{
+		if (afterStartWaitElapsed < afterStartWaitTime) {
+			afterStartWaitElapsed += Time.deltaTime;
+			return;
+		}
 		if (isBuilding) {
 			// Check if being Blocked
 			Ray r =	Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -82,7 +100,7 @@ public class BuilderManager : MonoBehaviour
 
 			// Check Build
 			if (Input.GetMouseButtonDown (0) && !isBlocked) {
-				BuildObject ();
+				ConfirmBuild ();
 			}
 
 		}

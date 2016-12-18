@@ -8,6 +8,8 @@ public class TravelPoint : MonoBehaviour
 
 	private void Exit(EnemyUnit e)
 	{
+		WaveManager wm = GameObject.FindObjectOfType<WaveManager> ();
+		wm.enemiesAlive--;
 		Destroy (e.gameObject);
 	}
 

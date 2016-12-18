@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class TEST_ShuffleTEST : MonoBehaviour {
 	public bool hasDrawn = false;
-	private string drawText = "Draw";
+	private string drawText = "Draw Again";
 
 	void OnGUI()
 	{
@@ -20,7 +20,7 @@ public class TEST_ShuffleTEST : MonoBehaviour {
 
 		if (hasDrawn) {
 			if (GUI.Button (new Rect (Screen.width - 100, Screen.height / 2, 100, 50), "Cash In")) {
-				HandEnum hand = DeckManager.instance.CashIn ();
+				HandEnum hand = DeckManager.instance.PlayHand ();
 				print (hand.ToString ());
 			}
 		}
