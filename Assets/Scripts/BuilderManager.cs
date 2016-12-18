@@ -20,10 +20,10 @@ public class BuilderManager : MonoBehaviour
 	private bool isBlocked = false;
 
 	private GameObject currentStatusObject;
+	private Tower currentBuilding;
 
 	private float afterStartWaitTime = 0.2f;
 	private float afterStartWaitElapsed = 0.0f;
-	private GameObject currentBuilding;
 
 	public class BuildEvent : UnityEvent{}
 	public BuildEvent onBuild = new BuildEvent ();
@@ -32,12 +32,13 @@ public class BuilderManager : MonoBehaviour
 	public void StartBuilding(GameObject objToBuild)
 	{
 		afterStartWaitElapsed = 0;
-		currentBuilding = objToBuild;
-		currentBuilding.GetComponent<Collider> ().enabled = false;
+		currentBuilding = objToBuild.GetComponent<Tower>();
 		currentStatusObject = OKInidicatorObj;
 		OKInidicatorObj.SetActive (true);
 		isBuilding = true;
 		confirmBtn.SetActive (true);
+		currentBuilding.SetState (Tower.state.Placement);
+
 
 	}
 
@@ -46,7 +47,7 @@ public class BuilderManager : MonoBehaviour
 		isBuilding = false;
 		OKInidicatorObj.SetActive (false);
 		BlockedIndicitaroObj.SetActive (false);
-		currentBuilding.GetComponent<Collider> ().enabled = true;
+		currentBuilding.SetState (Tower.state.Active);
 		currentBuilding = null;
 		onBuild.Invoke ();
 	}
@@ -64,6 +65,22 @@ public class BuilderManager : MonoBehaviour
 		BuildObject ();
 	}
 		
+	public void SetBlocked()
+	{
+		isBlocked = true;
+		OKInidicatorObj.SetActive (false);
+		BlockedIndicitaroObj.SetActive (true);
+		currentStatusObject = BlockedIndicitaroObj;
+	}
+
+	public void SetUnBlocked()
+	{
+		isBlocked = false;
+		OKInidicatorObj.SetActive (true);
+		BlockedIndicitaroObj.SetActive (false);
+		currentStatusObject = OKInidicatorObj;
+	}
+
 	private void SwapStatusIndicator()
 	{
 		isBlocked = !isBlocked;
@@ -90,23 +107,15 @@ public class BuilderManager : MonoBehaviour
 			return;
 		}
 		if (isBuilding) {
-			if (Input.touchCount > 0 && Input.GetTouch (0).phase == TouchPhase.Moved || Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.OSXEditor) {
+			if (Input.touchCount > 0 && Input.GetTouch (0).phase == TouchPhase.Moved || Application.platform == RuntimePlatform.WindowsEditor || Application.platform == RuntimePlatform.OSXEditor) {
 				// Check if being Blocked
 				Ray r =	Camera.main.ScreenPointToRay (Input.mousePosition);
 				RaycastHit hit;
 				if (Physics.Raycast (r, out hit)) {
-					if (hit.collider.tag == towerTag) {
-						if (!isBlocked) {
-							SwapStatusIndicator ();
-						}
-					} else {
-						if (isBlocked) {
-							SwapStatusIndicator ();
-						}
-					}
 					// Update Position
 					UpdateIndicatorPosition (hit.point);
 				}
+
 
 				// Check Build
 				if (Input.GetMouseButtonDown (0) && !isBlocked) {
