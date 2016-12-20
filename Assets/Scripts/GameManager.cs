@@ -2,11 +2,24 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Game manager.
+/// In charge of flow.
+/// 1. Show card panel
+/// 2. Place tower
+/// 3. Start Wave
+/// 4. Wave Results
+/// 	4.a If still alive
+/// 	4.b Repeat
+/// 	4.c If dead
+/// 	4.d end
+/// 5. End Game in Defeat or Victory
+/// </summary>
 public class GameManager : MonoBehaviour
 {
 	public static GameManager instance;
 
-	public DrawPanel cardPanel;
+	public CardPanel cardPanel;
 
 	public DeckManager deckManager;
 
@@ -16,31 +29,49 @@ public class GameManager : MonoBehaviour
 
 	public WaveManager waveMgr;
 
-	public void HandPlayed(HandEnum h) 
+	public void HandPlayed(Hand h) 
 	{
+		// Disable the Card Panel
 		cardPanel.gameObject.SetActive (false);
-		GameObject towerPrefab = towers.GetTowerPrefabByHand (h);
-		builder.onBuild.AddListener (EndBuild);
+		// Get Tower based on hand type
+		GameObject towerPrefab = towers.GetTowerPrefabByHand (h.type);
+		// Create tower
 		GameObject go = Instantiate (towerPrefab);
+		// Start Building
 		builder.StartBuilding (go);
-		WaveManager wavemgr = GameObject.FindObjectOfType<WaveManager> ();
-		wavemgr.onWaveFinish.AddListener (EndWave);
 	}
-
-
+		
 	private void EndBuild()
 	{
-		builder.onBuild.RemoveListener (EndBuild);
-		waveMgr.SpawnWave ();
+		waveMgr.StartWave ();;
+	}
+
+	private void EndGame()
+	{
+		// End game
+		Application.Quit();
 	}
 
 	private void EndWave()
 	{
-		cardPanel.gameObject.SetActive (true);
-		cardPanel.FirstDraw ();
-		deckManager.numDrawsPurchased += 1;
-	}
+		// Check Death
+		if (JudgeDeath ()) {
+			EndGame ();
+			return;
+		}
+		// Show wave Results
+		ShowResults();
 
+		// Start Next Round
+		StartRound ();
+
+	}
+		
+	private bool JudgeDeath()
+	{
+		// TODO: win conditions
+		return false;
+	}
 
 	private void SetInstance()
 	{
@@ -52,6 +83,18 @@ public class GameManager : MonoBehaviour
 		}
 	}
 
+	private void ShowResults()
+	{
+		// TODO: Display panel for X seconds
+	}
+
+	private void StartRound()
+	{
+		cardPanel.gameObject.SetActive (true);
+		deckManager.PurchaseFreeDraw ();
+		cardPanel.FirstDraw ();
+	}
+
 	void Awake()
 	{
 		SetInstance ();
@@ -59,12 +102,19 @@ public class GameManager : MonoBehaviour
 
 	void Start()
 	{
-		cardPanel = GameObject.FindObjectOfType<DrawPanel> ();
+		// Get Modules / Managers
 		deckManager = DeckManager.instance;
 		towers = TowerDB.instance;
 		builder = GameObject.FindObjectOfType<BuilderManager> ();
 		waveMgr = GameObject.FindObjectOfType<WaveManager> ();
+		cardPanel = GameObject.FindObjectOfType<CardPanel> ();
 
-		cardPanel.FirstDraw ();
+		// Add Event Listeners
+		waveMgr.onWaveFinish.AddListener (EndWave);
+		cardPanel.onPlayHand.AddListener (HandPlayed);
+		builder.onBuild.AddListener (EndBuild);
+
+		// TODO: put this somewhere else
+		StartRound();
 	}
 }

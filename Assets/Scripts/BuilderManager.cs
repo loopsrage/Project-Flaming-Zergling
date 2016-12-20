@@ -38,7 +38,7 @@ public class BuilderManager : MonoBehaviour
 		isBuilding = true;
 		confirmBtn.SetActive (true);
 		currentBuilding.SetState (Tower.state.Placement);
-
+		UpdateIndicatorPosition (Vector3.zero);
 
 	}
 

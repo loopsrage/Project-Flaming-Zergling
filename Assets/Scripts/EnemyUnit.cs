@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine.AI;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class EnemyUnit : MonoBehaviour
 {
@@ -11,9 +12,21 @@ public class EnemyUnit : MonoBehaviour
 	public int hp = 5;
 	public int armor = 0;
 
+	public bool isDead = false;
+
+	public class EnemyEvent : UnityEvent<EnemyUnit>{}
+	public EnemyEvent onDeath = new EnemyEvent();
+
+	public void Create()
+	{
+		
+	}
+
 	public void Die()
 	{
-		Destroy (this.gameObject);
+		isDead = true;
+		onDeath.Invoke (this);
+		this.gameObject.SetActive (false);
 	}
 
 	public void SetDestination(TravelPoint tp)
@@ -21,13 +34,18 @@ public class EnemyUnit : MonoBehaviour
 		agent.SetDestination (tp.transform.position);
 	}
 
-	public void TakeDamage(int dmg)
+	public bool TakeDamage(int dmg)
 	{
-		dmg = (dmg-armor > 0) ? dmg-armor : 0;
+		if (isDead) {
+			return false;
+		}
+		dmg = (dmg-armor > 0) ? dmg-armor : 1;
 		hp -= dmg;
 		if (hp <= 0) {
 			Die ();
+			return true;
 		}
+		return false;
 			
 	}
 

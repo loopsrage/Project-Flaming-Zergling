@@ -1,15 +1,19 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
-public class DrawPanel : MonoBehaviour 
+public class CardPanel : MonoBehaviour 
 {
 	const string DRAW_TEXT = "Draw";
 	public Button redrawBtn;
 	public Text redrawText;
 
 	public CardDisplay[] displays;
+
+	public class CardPanelEvent : UnityEvent<Hand>{}
+	public CardPanelEvent onPlayHand = new CardPanelEvent();
 
 	public void AddCard(Card c, int index)
 	{
@@ -28,14 +32,16 @@ public class DrawPanel : MonoBehaviour
 		DeckManager.instance.DrawFive ();
 		if (DeckManager.instance.numDrawsPurchased > 0) {
 			redrawBtn.enabled = true;
-			UpdateDrawText ();
+		} else {
+			redrawBtn.enabled = false;
 		}
+		UpdateDrawText ();
 	}
 
 	public void PlayHand()
 	{
-		GameManager.instance.HandPlayed(DeckManager.instance.PlayHand ());
-
+		Hand playedHand = DeckManager.instance.PlayHand ();
+		onPlayHand.Invoke (playedHand);
 	}
 
 	public void Redraw()
