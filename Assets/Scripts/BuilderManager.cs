@@ -15,7 +15,6 @@ public class BuilderManager : MonoBehaviour
 	private GameObject BlockedIndicitaroObj;
 
 	public GameObject confirmBtn;
-	private GridOverlay overlay;
 
 	private bool isBuilding = false;
 	private bool isBlocked = false;
@@ -40,7 +39,7 @@ public class BuilderManager : MonoBehaviour
 		confirmBtn.SetActive (true);
 		currentBuilding.SetState (Tower.state.Placement);
 		UpdateIndicatorPosition (Vector3.zero);
-		overlay.enabled = true;
+
 	}
 
 	private void BuildObject()
@@ -50,7 +49,6 @@ public class BuilderManager : MonoBehaviour
 		BlockedIndicitaroObj.SetActive (false);
 		currentBuilding.Build ();
 		currentBuilding = null;
-		overlay.enabled = false;
 		onBuild.Invoke ();
 	}
 
@@ -93,10 +91,7 @@ public class BuilderManager : MonoBehaviour
 		currentBuilding.transform.position = new Vector3 (x, y, z);
 	}
 
-	void Awake()
-	{
-		overlay = GameObject.FindObjectOfType<GridOverlay> ();
-	}
+
 
 	void Update()
 	{
