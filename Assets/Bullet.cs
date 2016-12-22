@@ -19,7 +19,7 @@ public class Bullet : MonoBehaviour
 		target = _target;
 		isTracking = true;
 	}
-
+		
 	private void HitDestroy()
 	{
 		Destroy (this.gameObject);
@@ -39,7 +39,7 @@ public class Bullet : MonoBehaviour
 		if (!isTracking) {
 			return;
 		}
-		if (!target.gameObject.activeInHierarchy || target == null ) {
+		if (target == null || !target.gameObject.activeInHierarchy) {
 			NoHitDestroy ();
 			return;
 		}	
