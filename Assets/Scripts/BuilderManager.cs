@@ -31,6 +31,7 @@ public class BuilderManager : MonoBehaviour
 
 	public void StartBuilding(GameObject objToBuild)
 	{
+		ShowBuildGrid ();
 		afterStartWaitElapsed = 0;
 		currentBuilding = objToBuild.GetComponent<Tower>();
 		currentStatusObject = OKInidicatorObj;
@@ -42,22 +43,12 @@ public class BuilderManager : MonoBehaviour
 
 	}
 
-	private void BuildObject()
-	{
-		isBuilding = false;
-		OKInidicatorObj.SetActive (false);
-		BlockedIndicitaroObj.SetActive (false);
-		currentBuilding.Build ();
-		currentBuilding = null;
-		onBuild.Invoke ();
-	}
-
 	public void PlaceBuilding()
 	{
 		confirmBtn.SetActive (false);
 		BuildObject ();
 	}
-		
+
 	public void SetBlocked()
 	{
 		isBlocked = true;
@@ -73,6 +64,30 @@ public class BuilderManager : MonoBehaviour
 		BlockedIndicitaroObj.SetActive (false);
 		currentStatusObject = OKInidicatorObj;
 	}
+
+	private void BuildObject()
+	{
+		HideBuildGrid ();
+		isBuilding = false;
+		OKInidicatorObj.SetActive (false);
+		BlockedIndicitaroObj.SetActive (false);
+		currentBuilding.Build ();
+		currentBuilding = null;
+		onBuild.Invoke ();
+	}
+
+	private void HideBuildGrid()
+	{
+		GameObject.FindObjectOfType<GridOverlay> ().enabled = false;
+	}
+
+
+
+	private void ShowBuildGrid()
+	{
+		GameObject.FindObjectOfType<GridOverlay> ().enabled = true;
+	}
+
 
 	private void SwapStatusIndicator()
 	{
