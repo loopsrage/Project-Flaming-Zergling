@@ -29,6 +29,8 @@ public class GameManager : MonoBehaviour
 
 	public WaveManager waveMgr;
 
+	public PathManager pathMgr;
+
 	public void HandPlayed(Hand h) 
 	{
 		// Disable the Card Panel
@@ -88,6 +90,16 @@ public class GameManager : MonoBehaviour
 		// TODO: Display panel for X seconds
 	}
 
+	private void StartGame()
+	{
+		// Calculate Path for game
+		pathMgr.SetupPath();
+
+
+		// Start Round
+		StartRound ();
+	}
+
 	private void StartRound()
 	{
 		cardPanel.gameObject.SetActive (true);
@@ -102,12 +114,14 @@ public class GameManager : MonoBehaviour
 
 	void Start()
 	{
+		// TODO: move all this code to an initialize function 
 		// Get Modules / Managers
 		deckManager = DeckManager.instance;
 		towers = TowerDB.instance;
 		builder = GameObject.FindObjectOfType<BuilderManager> ();
 		waveMgr = GameObject.FindObjectOfType<WaveManager> ();
 		cardPanel = GameObject.FindObjectOfType<CardPanel> ();
+		pathMgr = GameObject.FindObjectOfType<PathManager> ();
 
 		// Add Event Listeners
 		waveMgr.onWaveFinish.AddListener (EndWave);
@@ -115,6 +129,6 @@ public class GameManager : MonoBehaviour
 		builder.onBuild.AddListener (EndBuild);
 
 		// TODO: put this somewhere else
-		StartRound();
+		StartGame();
 	}
 }

@@ -5,29 +5,44 @@ using UnityEngine.Events;
 
 public class WaveManager : MonoBehaviour 
 {
+	// HP Growth
 	const float HP_LINEAR_GROWTH = 1.2f;
 	const float HP_EXP_GROWTH = 1.85f;
 	const float HP_BASE = 10;
+
+	// Armor Growth
 	const float ARMOR_GROWTH = 0.03f;
 	const float ARMOR_BASE = -1;
+
+	// Spawns 
 	const int SPAWNS_PER_WAVE = 25;
 	const float TIME_BETWEEN_SPAWNS = 0.75f;
+
+	// Round Info
 	public int roundNum = 0;
 	private int roundHp = 1;
 	private int roundArmor = 0;
 
+	// HP Displays
 	private EnemyHPBarPool hpBarPool;
 
-	public GameObject enemyPrefab;
-	public Transform spawnPos;
+	// Game Manager
+	private PathManager pathMgr;
 
+	// Enemy Prefab
+	public GameObject enemyPrefab;
+
+	// Wave Information
+	private int enemiesAlive = 0;
+	private int enemiesLeaked = 0;
+	private List<EnemyUnit> spawnedEnemies;
+
+	// End Wave Event
 	public class WaveEvent : UnityEvent{}
 	public WaveEvent onWaveFinish = new WaveEvent();
 
-	private int enemiesAlive = 0;
-	[SerializeField]
-	private int enemiesLeaked = 0;
-	private List<EnemyUnit> spawnedEnemies;
+
+
 
 	public void EnemyDied(EnemyUnit eu)
 	{
@@ -44,7 +59,16 @@ public class WaveManager : MonoBehaviour
 
 	public void StartWave ()
 	{
+		// Incrememt wave number
 		roundNum++;
+
+		// get wave healt/armor
+		CalculateEnemyAttributes ();
+
+		// Count Enemies
+		enemiesAlive = SPAWNS_PER_WAVE;
+
+		// Start spawning
 		StartCoroutine (SpawnWave ());
 	}
 
@@ -77,15 +101,15 @@ public class WaveManager : MonoBehaviour
 
 	private IEnumerator SpawnWave()
 	{
-		// get wave healt/armor
-		CalculateEnemyAttributes ();
-		// Count Enemies
-		enemiesAlive = SPAWNS_PER_WAVE;
-		// Spawn each wave
+		// Get First Point in Path
+		TravelPoint firstPoint = GameManager.instance.pathMgr.GetFirstPoint();
+		Transform spawnPoint = GameManager.instance.pathMgr.startPoint;
+
+		// Spawn each enemy for this wave
 		spawnedEnemies = new List<EnemyUnit>();
 		for (int i = 0; i < SPAWNS_PER_WAVE; ++i) {
 			// Create Enemy
-			GameObject go = Instantiate (enemyPrefab, spawnPos.position, Quaternion.identity);
+			GameObject go = Instantiate (enemyPrefab, spawnPoint.position, Quaternion.identity);
 			EnemyUnit eu = go.GetComponent<EnemyUnit> ();
 			if (eu == null) {
 				throw new MissingComponentException("no enemy unit found on enemy prefab");
@@ -98,7 +122,7 @@ public class WaveManager : MonoBehaviour
 			eu.hp = roundHp;
 			eu.armor = roundArmor;
 			// Set Path
-			eu.SetDestination (GameObject.FindObjectOfType<TravelPoint> ());
+			eu.SetDestination (firstPoint);
 			// Call enemy constructor
 			eu.Create ();
 			// Assign hp bar
@@ -112,6 +136,11 @@ public class WaveManager : MonoBehaviour
 	void Awake()
 	{
 		hpBarPool = GameObject.FindObjectOfType<EnemyHPBarPool> ();
+	}
+
+	void Start()
+	{
+		
 	}
 
 	void Update()
