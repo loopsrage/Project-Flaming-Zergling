@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.Events;
 
 public class WaveManager : MonoBehaviour 
@@ -8,7 +9,7 @@ public class WaveManager : MonoBehaviour
 	// HP Growth
 	const float HP_LINEAR_GROWTH = 1.2f;
 	const float HP_EXP_GROWTH = 1.85f;
-	const float HP_BASE = 10;
+	const float HP_BASE = 9;
 
 	// Armor Growth
 	const float ARMOR_GROWTH = 0.03f;
@@ -19,9 +20,10 @@ public class WaveManager : MonoBehaviour
 	const float TIME_BETWEEN_SPAWNS = 0.75f;
 
 	// Round Info
-	public int roundNum = 0;
+	private int roundNum = 0;
 	private int roundHp = 1;
 	private int roundArmor = 0;
+	public Text roundNumTextDisplay;
 
 	// HP Displays
 	private EnemyHPBarPool hpBarPool;
@@ -36,6 +38,7 @@ public class WaveManager : MonoBehaviour
 	private int enemiesAlive = 0;
 	private int enemiesLeaked = 0;
 	private List<EnemyUnit> spawnedEnemies;
+	public Text leakedTextDisplay;
 
 	// End Wave Event
 	public class WaveEvent : UnityEvent{}
@@ -55,12 +58,17 @@ public class WaveManager : MonoBehaviour
 	public void EnemyLeaked()
 	{
 		enemiesLeaked++;
+		leakedTextDisplay.text = "Leaks: " + enemiesLeaked.ToString ();
 	}
 
 	public void StartWave ()
 	{
 		// Incrememt wave number
 		roundNum++;
+
+		// Show Wave Count
+		ShowWaveCount();
+		ShowLeakCount ();
 
 		// get wave healt/armor
 		CalculateEnemyAttributes ();
@@ -97,6 +105,17 @@ public class WaveManager : MonoBehaviour
 		// Report the wave as finished
 		onWaveFinish.Invoke ();
 
+	}
+		
+	private void ShowLeakCount()
+	{
+		leakedTextDisplay.transform.parent.gameObject.SetActive (true);
+	}
+
+	private void ShowWaveCount()
+	{
+		roundNumTextDisplay.text = "Round: " + roundNum.ToString ();
+		roundNumTextDisplay.transform.parent.gameObject.SetActive (true);
 	}
 
 	private IEnumerator SpawnWave()

@@ -45,7 +45,8 @@ public class GameManager : MonoBehaviour
 		
 	private void EndBuild()
 	{
-		waveMgr.StartWave ();;
+		// TODO: Move this elsewhere
+		waveMgr.StartWave ();
 	}
 
 	private void EndGame()
