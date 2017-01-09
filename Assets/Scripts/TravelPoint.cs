@@ -1,10 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
+[RequireComponent(typeof(NavMeshAgent))]
 public class TravelPoint : MonoBehaviour 
 {
 	public TravelPoint nextPoint;
+	public NavMeshAgent agent;
 
 	private void Exit(EnemyUnit e)
 	{
@@ -17,6 +20,12 @@ public class TravelPoint : MonoBehaviour
 	{
 		e.SetDestination (nextPoint);
 	}
+
+	void Awake()
+	{
+		agent = GetComponent<NavMeshAgent> ();
+	}
+		
 
 	void OnTriggerEnter(Collider other)
 	{

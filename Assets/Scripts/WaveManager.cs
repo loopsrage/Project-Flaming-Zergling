@@ -16,7 +16,7 @@ public class WaveManager : MonoBehaviour
 	const float ARMOR_BASE = -1;
 
 	// Spawns 
-	const int SPAWNS_PER_WAVE = 25;
+	const int SPAWNS_PER_WAVE = 10;
 	const float TIME_BETWEEN_SPAWNS = 0.75f;
 
 	// Round Info
@@ -122,13 +122,13 @@ public class WaveManager : MonoBehaviour
 	{
 		// Get First Point in Path
 		TravelPoint firstPoint = GameManager.instance.pathMgr.GetFirstPoint();
-		Transform spawnPoint = GameManager.instance.pathMgr.startPoint;
+		Vector3 spawnPoint = GameManager.instance.pathMgr.GetStartPoint();
 
 		// Spawn each enemy for this wave
 		spawnedEnemies = new List<EnemyUnit>();
 		for (int i = 0; i < SPAWNS_PER_WAVE; ++i) {
 			// Create Enemy
-			GameObject go = Instantiate (enemyPrefab, spawnPoint.position, Quaternion.identity);
+			GameObject go = Instantiate (enemyPrefab, spawnPoint, Quaternion.identity);
 			EnemyUnit eu = go.GetComponent<EnemyUnit> ();
 			if (eu == null) {
 				throw new MissingComponentException("no enemy unit found on enemy prefab");

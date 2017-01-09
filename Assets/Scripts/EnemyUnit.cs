@@ -9,7 +9,7 @@ public class EnemyUnit : MonoBehaviour
 	public TravelPoint travelPoint;
 	public NavMeshAgent agent;
 
-	public int hp = 4;
+	public int hp = 5;
 	public int armor = 0;
 
 	public bool isDead = false;

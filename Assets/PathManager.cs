@@ -1,14 +1,39 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class PathManager : MonoBehaviour 
 {
 	public GameObject travelPointPrefab;
-	public Transform startPoint;
+
 	public TravelPointArea[] areas;
 	private TravelPoint[] travelPoints;
+	private List<NavMeshPath> _paths;
+	public List<NavMeshPath> paths { get { return _paths; } }
 
+	public TravelPoint startPoint {get{ return travelPoints [0];}}
+
+	/// <summary>
+	/// Checks if the path is blocked.
+	/// </summary>
+	/// <returns><c>true</c>, if path is blocked<c>false</c> otherwise.</returns>
+	public bool CheckPathBlocked()
+	{
+		GetPaths ();
+
+		for (int i = 0; i < _paths.Count; ++i) {
+			if (_paths[i].status != NavMeshPathStatus.PathComplete) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public Vector3 GetStartPoint()
+	{
+		return startPoint.transform.position;
+	}
 
 	public void SetupPath()
 	{
@@ -29,6 +54,21 @@ public class PathManager : MonoBehaviour
 				tp.nextPoint = previousPoint;
 			}
 			previousPoint = travelPoints [i] = tp;
+		}
+
+		GetPaths ();
+	}
+
+	private void GetPaths()
+	{
+		// Check start to point 1, then point 1 to point n... 
+		NavMeshAgent pos_i = startPoint.agent;
+		_paths = new List<NavMeshPath>(travelPoints.Length){};
+
+		for (int i = 1; i < travelPoints.Length; ++i) {
+			_paths.Add(new NavMeshPath ());
+			pos_i.CalculatePath ( travelPoints [i].transform.position, _paths[i-1]);	
+			pos_i = travelPoints [i].agent;
 		}
 	}
 
@@ -51,5 +91,7 @@ public class PathManager : MonoBehaviour
 		}
 		return tp;
 	}
+
+
 
 }
