@@ -1,33 +1,51 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.Events;
 
 public class WaveManager : MonoBehaviour 
 {
+	// HP Growth
 	const float HP_LINEAR_GROWTH = 1.2f;
 	const float HP_EXP_GROWTH = 1.85f;
-	const float HP_BASE = 10;
+	const float HP_BASE = 9;
+
+	// Armor Growth
 	const float ARMOR_GROWTH = 0.03f;
 	const float ARMOR_BASE = -1;
-	const int SPAWNS_PER_WAVE = 25;
+
+	// Spawns 
+	const int SPAWNS_PER_WAVE = 10;
 	const float TIME_BETWEEN_SPAWNS = 0.75f;
-	public int roundNum = 0;
+
+	// Round Info
+	private int roundNum = 0;
 	private int roundHp = 1;
 	private int roundArmor = 0;
+	public Text roundNumTextDisplay;
 
+	// HP Displays
 	private EnemyHPBarPool hpBarPool;
 
-	public GameObject enemyPrefab;
-	public Transform spawnPos;
+	// Game Manager
+	private PathManager pathMgr;
 
+	// Enemy Prefab
+	public GameObject enemyPrefab;
+
+	// Wave Information
+	private int enemiesAlive = 0;
+	private int enemiesLeaked = 0;
+	private List<EnemyUnit> spawnedEnemies;
+	public Text leakedTextDisplay;
+
+	// End Wave Event
 	public class WaveEvent : UnityEvent{}
 	public WaveEvent onWaveFinish = new WaveEvent();
 
-	private int enemiesAlive = 0;
-	[SerializeField]
-	private int enemiesLeaked = 0;
-	private List<EnemyUnit> spawnedEnemies;
+
+
 
 	public void EnemyDied(EnemyUnit eu)
 	{
@@ -40,11 +58,25 @@ public class WaveManager : MonoBehaviour
 	public void EnemyLeaked()
 	{
 		enemiesLeaked++;
+		leakedTextDisplay.text = "Leaks: " + enemiesLeaked.ToString ();
 	}
 
 	public void StartWave ()
 	{
+		// Incrememt wave number
 		roundNum++;
+
+		// Show Wave Count
+		ShowWaveCount();
+		ShowLeakCount ();
+
+		// get wave healt/armor
+		CalculateEnemyAttributes ();
+
+		// Count Enemies
+		enemiesAlive = SPAWNS_PER_WAVE;
+
+		// Start spawning
 		StartCoroutine (SpawnWave ());
 	}
 
@@ -74,18 +106,29 @@ public class WaveManager : MonoBehaviour
 		onWaveFinish.Invoke ();
 
 	}
+		
+	private void ShowLeakCount()
+	{
+		leakedTextDisplay.transform.parent.gameObject.SetActive (true);
+	}
+
+	private void ShowWaveCount()
+	{
+		roundNumTextDisplay.text = "Round: " + roundNum.ToString ();
+		roundNumTextDisplay.transform.parent.gameObject.SetActive (true);
+	}
 
 	private IEnumerator SpawnWave()
 	{
-		// get wave healt/armor
-		CalculateEnemyAttributes ();
-		// Count Enemies
-		enemiesAlive = SPAWNS_PER_WAVE;
-		// Spawn each wave
+		// Get First Point in Path
+		TravelPoint firstPoint = GameManager.instance.pathMgr.GetFirstPoint();
+		Vector3 spawnPoint = GameManager.instance.pathMgr.GetStartPoint();
+
+		// Spawn each enemy for this wave
 		spawnedEnemies = new List<EnemyUnit>();
 		for (int i = 0; i < SPAWNS_PER_WAVE; ++i) {
 			// Create Enemy
-			GameObject go = Instantiate (enemyPrefab, spawnPos.position, Quaternion.identity);
+			GameObject go = Instantiate (enemyPrefab, spawnPoint, Quaternion.identity);
 			EnemyUnit eu = go.GetComponent<EnemyUnit> ();
 			if (eu == null) {
 				throw new MissingComponentException("no enemy unit found on enemy prefab");
@@ -98,7 +141,7 @@ public class WaveManager : MonoBehaviour
 			eu.hp = roundHp;
 			eu.armor = roundArmor;
 			// Set Path
-			eu.SetDestination (GameObject.FindObjectOfType<TravelPoint> ());
+			eu.SetDestination (firstPoint);
 			// Call enemy constructor
 			eu.Create ();
 			// Assign hp bar
@@ -112,6 +155,11 @@ public class WaveManager : MonoBehaviour
 	void Awake()
 	{
 		hpBarPool = GameObject.FindObjectOfType<EnemyHPBarPool> ();
+	}
+
+	void Start()
+	{
+		
 	}
 
 	void Update()

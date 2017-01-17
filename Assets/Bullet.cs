@@ -6,7 +6,7 @@ using UnityEngine.Events;
 [RequireComponent(typeof(SphereCollider))]
 public class Bullet : MonoBehaviour
 {
-	const float HIT_DISTANCE = 0.3f;
+	const float HIT_DISTANCE = 0.5f;
 	public float rotateSpeed = 4;
 	public float moveSpeed = 5;
 	EnemyUnit target;

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.Events;
 
 public class BuilderManager : MonoBehaviour 
@@ -32,6 +33,7 @@ public class BuilderManager : MonoBehaviour
 	public void StartBuilding(GameObject objToBuild)
 	{
 		ShowBuildGrid ();
+
 		afterStartWaitElapsed = 0;
 		currentBuilding = objToBuild.GetComponent<Tower>();
 		currentStatusObject = OKInidicatorObj;
@@ -76,16 +78,38 @@ public class BuilderManager : MonoBehaviour
 		onBuild.Invoke ();
 	}
 
+	private bool CheckPath()
+	{
+		PathManager pm = GameObject.FindObjectOfType<PathManager> ();
+		return pm.CheckPathBlocked ();
+	}
+
 	private void HideBuildGrid()
 	{
 		GameObject.FindObjectOfType<GridOverlay> ().enabled = false;
 	}
 
+	private void PathBlockedMessage()
+	{
+		Debug.Log ("Placement Blocked");
+	}
 
 
 	private void ShowBuildGrid()
 	{
 		GameObject.FindObjectOfType<GridOverlay> ().enabled = true;
+	}
+
+	private List<NavMeshPath> _paths;
+	private void ShowEnemyPath ()
+	{
+			PathVisualizer pv = GameObject.FindObjectOfType<PathVisualizer> ();
+			PathManager pm = GameObject.FindObjectOfType<PathManager> ();
+
+		pm.CheckPathBlocked ();
+		//for (int i = 0; i < pm.paths.Count; ++i) {
+		pv.DrawPaths (pm.paths);
+		//}
 	}
 
 
@@ -107,7 +131,6 @@ public class BuilderManager : MonoBehaviour
 	}
 
 
-
 	void Update()
 	{
 		if (afterStartWaitElapsed < afterStartWaitTime) {
@@ -115,6 +138,7 @@ public class BuilderManager : MonoBehaviour
 			return;
 		}
 		if (isBuilding) {
+			ShowEnemyPath ();
 			if (Input.touchCount > 0 && Input.GetTouch (0).phase == TouchPhase.Moved || Application.platform == RuntimePlatform.WindowsEditor || Application.platform == RuntimePlatform.OSXEditor) {
 				// Check if being Blocked
 				Ray r =	Camera.main.ScreenPointToRay (Input.mousePosition);
@@ -127,7 +151,13 @@ public class BuilderManager : MonoBehaviour
 
 				// Check Build
 				if (Input.GetMouseButtonDown (0) && !isBlocked) {
-					PlaceBuilding ();
+					if (CheckPath ()) {
+						PlaceBuilding ();
+					} else {
+						// Display Build Error
+						PathBlockedMessage();
+						//SetBlocked ();
+					}
 				}
 			}
 		}
